@@ -107,8 +107,16 @@ public class ListenerService extends WearableListenerService implements GooglePl
     private void showToast(String message) {
         Log.v("Hello", "buttonClicked");
         if(locationclient!=null && locationclient.isConnected()) {
-            Location loc1 =locationclient.getLastLocation();
             Location loc =locationclient.getLastLocation();
+
+            Log.v("Hello", Double.toString(loc.getLatitude()));
+            if(loc == null)
+            {
+                Log.v("Hello", "loc is null");
+                locationclient = new LocationClient(this,this,this);
+                locationclient.connect();
+                loc = locationclient.getLastLocation();
+            }
             Log.v("Hello", "Last Known Location :" + loc.getLatitude() + "," + loc.getLongitude());
             Toast.makeText(this, loc.getLatitude() + " " + loc.getLongitude(), Toast.LENGTH_SHORT).show();
 
@@ -179,5 +187,7 @@ public class ListenerService extends WearableListenerService implements GooglePl
             }
         }).start();
     }
+
+
 
 }
