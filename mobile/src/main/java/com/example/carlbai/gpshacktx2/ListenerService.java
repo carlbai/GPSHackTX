@@ -4,9 +4,13 @@ package com.example.carlbai.gpshacktx2;
  * Created by carlbai on 10/18/14.
  */
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -20,6 +24,13 @@ import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 import com.google.android.gms.wearable.WearableListenerService;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -35,31 +46,64 @@ public class ListenerService extends WearableListenerService implements GooglePl
 
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
-        Log.v("Hello", "onMessagedReceived");
-        initApi();
-        int resp = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
 
-        if(resp == ConnectionResult.SUCCESS){
-            locationclient = new LocationClient(this,this,this);
-            locationclient.connect();
-        }
-        else
+        if(messageEvent.getPath().equals("Location"))
         {
-            Toast.makeText(this, "Google Play Service Error " + resp, Toast.LENGTH_LONG).show();
+            Log.v("Hello", "Location");
+            initApi();
+            int resp = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+
+            if(resp == ConnectionResult.SUCCESS){
+                locationclient = new LocationClient(this,this,this);
+                locationclient.connect();
+            }
+            else
+            {
+                Toast.makeText(this, "Google Play Service Error " + resp, Toast.LENGTH_LONG).show();
+            }
+
+
+            showToast(messageEvent.getPath());
+
+        }
+        else if(messageEvent.getPath().equals("Navigation"))
+        {
+            Log.v("Hello", "Navigation");
+            FileInputStream in = null;
+
+            try {
+                in = openFileInput("outputfile");
+                InputStreamReader inputStreamReader = new InputStreamReader(in);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                StringBuilder sb = new StringBuilder();
+                String line = bufferedReader.readLine();
+
+                Log.v("Hello", line);
+
+                Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse("google.navigation:q=" + line + "&mode=w "));
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(i);
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
         }
 
-
-        showToast(messageEvent.getPath());
     }
 
     private void showToast(String message) {
         Log.v("Hello", "buttonClicked");
         if(locationclient!=null && locationclient.isConnected()) {
+            Location loc1 =locationclient.getLastLocation();
             Location loc =locationclient.getLastLocation();
             Log.v("Hello", "Last Known Location :" + loc.getLatitude() + "," + loc.getLongitude());
             Toast.makeText(this, loc.getLatitude() + " " + loc.getLongitude(), Toast.LENGTH_SHORT).show();
 
             final String temp = Double.toString(loc.getLatitude()) + " "  + Double.toString(loc.getLongitude());
+            final String coordinates = Double.toString(loc.getLatitude()) + ", "  + Double.toString(loc.getLongitude());
 
 
             if (nodeId != null) {
@@ -71,6 +115,17 @@ public class ListenerService extends WearableListenerService implements GooglePl
                         client.disconnect();
                     }
                 }).start();
+            }
+
+            String filename = "outputfile";
+            String string = coordinates;
+            FileOutputStream outputStream;
+            try {
+                outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
+                outputStream.write(string.getBytes());
+                outputStream.close();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
 
