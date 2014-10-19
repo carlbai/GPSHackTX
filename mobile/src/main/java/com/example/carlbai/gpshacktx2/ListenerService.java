@@ -3,11 +3,13 @@ package com.example.carlbai.gpshacktx2;
 /**
  * Created by carlbai on 10/18/14.
  */
+import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
@@ -89,6 +91,14 @@ public class ListenerService extends WearableListenerService implements GooglePl
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
+            PowerManager pm = (PowerManager) getApplicationContext().getSystemService(Context.POWER_SERVICE);
+            PowerManager.WakeLock wakeLock = pm.newWakeLock((PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP), "TAG");
+            wakeLock.acquire();
+
+            KeyguardManager keyguardManager = (KeyguardManager) getApplicationContext().getSystemService(Context.KEYGUARD_SERVICE);
+            KeyguardManager.KeyguardLock keyguardLock =  keyguardManager.newKeyguardLock("TAG");
+            keyguardLock.disableKeyguard();
 
         }
 
