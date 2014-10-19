@@ -100,6 +100,7 @@ public class ListenerService extends WearableListenerService implements GooglePl
             KeyguardManager.KeyguardLock keyguardLock =  keyguardManager.newKeyguardLock("TAG");
             keyguardLock.disableKeyguard();
 
+
         }
 
     }

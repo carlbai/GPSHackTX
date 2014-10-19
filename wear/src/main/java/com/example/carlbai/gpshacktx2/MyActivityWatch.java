@@ -2,6 +2,7 @@ package com.example.carlbai.gpshacktx2;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.wearable.view.WatchViewStub;
@@ -114,6 +115,11 @@ public class MyActivityWatch extends Activity {
                     client.disconnect();
                 }
             }).start();
+            moveTaskToBack(true);
+//            Intent intent = new Intent(Intent.ACTION_MAIN);
+//            intent.addCategory(Intent.CATEGORY_HOME);
+//            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//            startActivty(intent);
 
         }
     }
