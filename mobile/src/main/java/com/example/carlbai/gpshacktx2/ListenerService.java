@@ -48,11 +48,11 @@ public class ListenerService extends WearableListenerService implements GooglePl
 
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
-
+        initApi();
         if(messageEvent.getPath().equals("Location"))
         {
             Log.v("Hello", "Location");
-            initApi();
+
             int resp = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
 
             if(resp == ConnectionResult.SUCCESS){
@@ -106,17 +106,16 @@ public class ListenerService extends WearableListenerService implements GooglePl
 
     private void showToast(String message) {
         Log.v("Hello", "buttonClicked");
+        while(locationclient ==null || !locationclient.isConnected()){
+            Log.v("Hello", "stupid");
+            locationclient = new LocationClient(this,this,this);
+            locationclient.connect();
+        }
+
         if(locationclient!=null && locationclient.isConnected()) {
             Location loc =locationclient.getLastLocation();
+            loc = locationclient.getLastLocation();
 
-            Log.v("Hello", Double.toString(loc.getLatitude()));
-            if(loc == null)
-            {
-                Log.v("Hello", "loc is null");
-                locationclient = new LocationClient(this,this,this);
-                locationclient.connect();
-                loc = locationclient.getLastLocation();
-            }
             Log.v("Hello", "Last Known Location :" + loc.getLatitude() + "," + loc.getLongitude());
             Toast.makeText(this, loc.getLatitude() + " " + loc.getLongitude(), Toast.LENGTH_SHORT).show();
 
@@ -128,8 +127,9 @@ public class ListenerService extends WearableListenerService implements GooglePl
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
+                        Log.v("Hello", "I am going to try to send a messsage to the watch");
                         client.blockingConnect(CONNECTION_TIME_OUT_MS, TimeUnit.MILLISECONDS);
-                        Wearable.MessageApi.sendMessage(client, nodeId, temp, null);
+                        Wearable.MessageApi.sendMessage(client, nodeId, "test", null);
                         client.disconnect();
                     }
                 }).start();
@@ -139,6 +139,7 @@ public class ListenerService extends WearableListenerService implements GooglePl
             String string = coordinates;
             FileOutputStream outputStream;
             try {
+                Log.v("Hello", "I am storing your coordinates");
                 outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
                 outputStream.write(string.getBytes());
                 outputStream.close();
