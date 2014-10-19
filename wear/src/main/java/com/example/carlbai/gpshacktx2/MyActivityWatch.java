@@ -78,6 +78,13 @@ public class MyActivityWatch extends Activity {
                 sendToast();
             }
         });
+
+        findViewById(R.id.btn_toast2).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startNavi();
+            }
+        });
     }
 
     private void sendToast() {
@@ -89,10 +96,24 @@ public class MyActivityWatch extends Activity {
                 @Override
                 public void run() {
                     client.blockingConnect(CONNECTION_TIME_OUT_MS, TimeUnit.MILLISECONDS);
-                    Wearable.MessageApi.sendMessage(client, nodeId, MESSAGE, null);
+                    Wearable.MessageApi.sendMessage(client, nodeId, "Location", null);
                     client.disconnect();
                 }
             }).start();
         }
     }
+
+    private void startNavi(){
+        if (nodeId != null) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    client.blockingConnect(CONNECTION_TIME_OUT_MS, TimeUnit.MILLISECONDS);
+                    Wearable.MessageApi.sendMessage(client, nodeId, "Navigation", null);
+                    client.disconnect();
+                }
+            }).start();
+        }
+    }
+
 }

@@ -18,5 +18,13 @@
         android:layout_width="wrap_content"
         android:layout_height="96dp"
         android:layout_gravity="center"
-        android:text="BLAHHHHHH"/>
+        android:text="   Get GPS"/>
+
+
+    <Button
+        android:id="@+id/btn_toast2"
+        android:layout_width="wrap_content"
+        android:layout_height="96dp"
+        android:layout_alignParentBottom="true"
+        android:text="  Navigate"/>
 </LinearLayout>
