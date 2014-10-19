@@ -4,24 +4,34 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MyActivityWatch"
-    tools:deviceIds="wear_round">
+    tools:deviceIds="wear_round"
+    android:background="@color/black">
 
-    <TextView
-        android:id="@+id/text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="10dp"
+        android:background="@android:color/white"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:text="@string/hello_round" />
 
     <Button
-        android:id="@+id/btn_toast"
-        android:layout_width="wrap_content"
-        android:layout_height="96dp"
-        android:layout_gravity="center"
-        android:text="BLAHHHHHH"/>
+        android:id="@+id/btn_park"
+        android:layout_width="90dp"
+        android:layout_height="100dp"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentTop="true"
+        android:background="@drawable/locationpin"
+        android:onClick="@drawable/locationpinblue"/>
 
-
+    <Button
+        android:id="@+id/btn_navigate"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/navigation" />
 
 
 </RelativeLayout>
