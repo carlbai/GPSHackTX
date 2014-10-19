@@ -9,6 +9,8 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -68,6 +70,7 @@ public class ListenerService extends WearableListenerService implements GooglePl
         {
             Log.v("Hello", "Navigation");
             FileInputStream in = null;
+
             try {
                 in = openFileInput("outputfile");
                 InputStreamReader inputStreamReader = new InputStreamReader(in);
@@ -77,7 +80,7 @@ public class ListenerService extends WearableListenerService implements GooglePl
 
                 Log.v("Hello", line);
 
-                Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse("google.navigation:q=" + line));
+                Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse("google.navigation:q=" + line + "&mode=w "));
                 i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(i);
 
@@ -94,6 +97,7 @@ public class ListenerService extends WearableListenerService implements GooglePl
     private void showToast(String message) {
         Log.v("Hello", "buttonClicked");
         if(locationclient!=null && locationclient.isConnected()) {
+            Location loc1 =locationclient.getLastLocation();
             Location loc =locationclient.getLastLocation();
             Log.v("Hello", "Last Known Location :" + loc.getLatitude() + "," + loc.getLongitude());
             Toast.makeText(this, loc.getLatitude() + " " + loc.getLongitude(), Toast.LENGTH_SHORT).show();

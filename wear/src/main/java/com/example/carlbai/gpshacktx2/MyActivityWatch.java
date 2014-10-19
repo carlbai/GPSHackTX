@@ -3,6 +3,7 @@ package com.example.carlbai.gpshacktx2;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.wearable.view.WatchViewStub;
 import android.util.Log;
 import android.view.View;
@@ -113,6 +114,7 @@ public class MyActivityWatch extends Activity {
                     client.disconnect();
                 }
             }).start();
+
         }
     }
 
