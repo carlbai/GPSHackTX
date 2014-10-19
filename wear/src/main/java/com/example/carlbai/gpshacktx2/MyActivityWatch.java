@@ -73,14 +73,14 @@ public class MyActivityWatch extends Activity {
     }
 
     private void setupWidgets() {
-        findViewById(R.id.btn_toast).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.btn_park).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 sendToast();
             }
         });
 
-        findViewById(R.id.btn_toast2).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.btn_navigate).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 startNavi();
