@@ -1,56 +1,98 @@
 package com.example.carlbai.gpshacktx2;
 
 import android.app.Activity;
-import android.location.Location;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.wearable.view.WatchViewStub;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesClient;
-import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.location.LocationClient;
 
-public class MyActivityWatch extends Activity implements GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener {
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.wearable.Node;
+import com.google.android.gms.wearable.NodeApi;
+import com.google.android.gms.wearable.Wearable;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+public class MyActivityWatch extends Activity {
 
     private TextView mTextView;
-    private LocationClient locationclient;
+
+    private static final long CONNECTION_TIME_OUT_MS = 100;
+    private static final String MESSAGE = "Hello Wear!";
+
+    private GoogleApiClient client;
+    private String nodeId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my_activity_watch);
+
+        initApi();
+
+
         final WatchViewStub stub = (WatchViewStub) findViewById(R.id.watch_view_stub);
         stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
             @Override
             public void onLayoutInflated(WatchViewStub stub) {
                 mTextView = (TextView) stub.findViewById(R.id.text);
+                setupWidgets();
             }
         });
-
-
-
-
     }
 
-
-
-
-    @Override
-    public void onConnected(Bundle bundle) {
-
+    private void initApi() {
+        client = getGoogleApiClient(this);
+        retrieveDeviceNode();
     }
 
-    @Override
-    public void onDisconnected() {
-
+    private GoogleApiClient getGoogleApiClient(Context context) {
+        return new GoogleApiClient.Builder(context)
+                .addApi(Wearable.API)
+                .build();
+    }
+    private void retrieveDeviceNode() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                client.blockingConnect(CONNECTION_TIME_OUT_MS, TimeUnit.MILLISECONDS);
+                NodeApi.GetConnectedNodesResult result =
+                        Wearable.NodeApi.getConnectedNodes(client).await();
+                List<Node> nodes = result.getNodes();
+                if (nodes.size() > 0) {
+                    nodeId = nodes.get(0).getId();
+                }
+                client.disconnect();
+            }
+        }).start();
     }
 
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
+    private void setupWidgets() {
+        findViewById(R.id.btn_toast).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                sendToast();
+            }
+        });
+    }
 
+    private void sendToast() {
+
+        Log.v("Hello", "sendtoast");
+
+        if (nodeId != null) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    client.blockingConnect(CONNECTION_TIME_OUT_MS, TimeUnit.MILLISECONDS);
+                    Wearable.MessageApi.sendMessage(client, nodeId, MESSAGE, null);
+                    client.disconnect();
+                }
+            }).start();
+        }
     }
 }
