@@ -18,7 +18,16 @@ public class ListenerServiceWatch extends WearableListenerService {
     public void onMessageReceived(MessageEvent messageEvent){
         Log.v("Hello", "WATCH");
         String message = "Location Saved";
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        if(messageEvent.getPath().equals("test"))
+        {
+
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        }
+        else
+        {
+            Toast.makeText(this, messageEvent.getPath(), Toast.LENGTH_SHORT).show();
+        }
+
 
     }
 }

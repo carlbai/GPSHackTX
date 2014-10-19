@@ -49,6 +49,7 @@ public class ListenerService extends WearableListenerService implements GooglePl
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
         initApi();
+        Log.v("Hello", messageEvent.getPath());
         if(messageEvent.getPath().equals("Location"))
         {
             Log.v("Hello", "Location");
@@ -72,7 +73,7 @@ public class ListenerService extends WearableListenerService implements GooglePl
         {
             Log.v("Hello", "Navigation");
             FileInputStream in = null;
-
+            FileInputStream memoIn = null;
             try {
                 in = openFileInput("outputfile");
                 InputStreamReader inputStreamReader = new InputStreamReader(in);
@@ -82,9 +83,32 @@ public class ListenerService extends WearableListenerService implements GooglePl
 
                 Log.v("Hello", line);
 
-                Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse("google.navigation:q=" + line + "&mode=w "));
+
+
+                memoIn = openFileInput("memofile");
+                InputStreamReader inputStreamReaderMemo = new InputStreamReader(memoIn);
+                BufferedReader bufferedReaderMemo = new BufferedReader(inputStreamReaderMemo);
+                final String memoLine = bufferedReaderMemo.readLine();
+
+                if (nodeId != null) {
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.v("Hello", "Memo messsage to the watch");
+                            client.blockingConnect(CONNECTION_TIME_OUT_MS, TimeUnit.MILLISECONDS);
+                            Wearable.MessageApi.sendMessage(client, nodeId, memoLine, null);
+                            client.disconnect();
+                        }
+                    }).start();
+                }
+
+
+                Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse("google.navigation:q=" + line +"&mode=w "));
                 i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(i);
+
+
+
 
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
@@ -102,6 +126,35 @@ public class ListenerService extends WearableListenerService implements GooglePl
 
 
         }
+        else if(messageEvent.getPath().equals("locationMemo")){
+            Log.v("Hello", "memo!");
+
+            int resp = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+
+            if(resp == ConnectionResult.SUCCESS){
+                locationclient = new LocationClient(this,this,this);
+                locationclient.connect();
+            }
+            else
+            {
+                Toast.makeText(this, "Google Play Service Error " + resp, Toast.LENGTH_LONG).show();
+            }
+
+            String voice = new String(messageEvent.getData());
+            //Toast.makeText(this, voice, Toast.LENGTH_SHORT).show();
+            String filename = "memofile";
+            String string = voice;
+            FileOutputStream outputStream;
+            try {
+                Log.v("Hello", "I am storing your memo");
+                outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
+                outputStream.write(string.getBytes());
+                outputStream.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+           // showToast("Memo");
+        }
 
     }
 
@@ -118,7 +171,7 @@ public class ListenerService extends WearableListenerService implements GooglePl
             loc = locationclient.getLastLocation();
 
             Log.v("Hello", "Last Known Location :" + loc.getLatitude() + "," + loc.getLongitude());
-            Toast.makeText(this, loc.getLatitude() + " " + loc.getLongitude(), Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, loc.getLatitude() + " " + loc.getLongitude(), Toast.LENGTH_SHORT).show();
 
             final String temp = Double.toString(loc.getLatitude()) + " "  + Double.toString(loc.getLongitude());
             final String coordinates = Double.toString(loc.getLatitude()) + ", "  + Double.toString(loc.getLongitude());

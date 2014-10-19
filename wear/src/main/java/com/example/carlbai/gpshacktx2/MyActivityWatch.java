@@ -5,10 +5,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.speech.RecognizerIntent;
 import android.support.wearable.view.WatchViewStub;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -21,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 public class MyActivityWatch extends Activity {
 
+    private static final int SPEECH_REQUEST_CODE = 0 ;
     private TextView mTextView;
 
     private static final long CONNECTION_TIME_OUT_MS = 100;
@@ -80,12 +83,19 @@ public class MyActivityWatch extends Activity {
                 sendToast();
             }
         });
+        findViewById(R.id.btn_park).setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                launchMemo();
+                return true;
+            }
+        });
 
         findViewById(R.id.btn_navigate).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startNavi();
-            }
+        @Override
+        public void onClick(View view) {
+            startNavi();
+        }
         });
     }
 
@@ -103,6 +113,40 @@ public class MyActivityWatch extends Activity {
                 }
             }).start();
         }
+    }
+
+    private void launchMemo() {
+        // Create an intent that can start the Speech Recognizer activity
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        // Start the activity, the intent will be populated with the speech text
+        startActivityForResult(intent, SPEECH_REQUEST_CODE);
+
+    }
+
+    // This callback is invoked when the Speech Recognizer returns.
+    // This is where you process the intent and extract the speech text from the intent.
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode,
+                                    Intent data) {
+        if (requestCode == SPEECH_REQUEST_CODE && resultCode == RESULT_OK) {
+            List<String> results = data.getStringArrayListExtra(
+                    RecognizerIntent.EXTRA_RESULTS);
+            final String spokenText = results.get(0);
+            if (nodeId != null) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        client.blockingConnect(CONNECTION_TIME_OUT_MS, TimeUnit.MILLISECONDS);
+                        Wearable.MessageApi.sendMessage(client, nodeId, "locationMemo", spokenText.getBytes());
+                        client.disconnect();
+
+                    }
+                }).start();
+            }
+                       }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     private void startNavi(){
